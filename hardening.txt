@@ -1,0 +1,192 @@
+Particiones:
+
+/
+/boot
+/boot/efi
+/home
+/opt
+/tmp
+/var
+/var/lib //requiere exec
+/var/log
+/var/log/audit
+/var/www
+
+/etc/modprobe.d/CIS.conf
+
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install squashfs /bin/true
+install udf /bin/true
+install dccp /bin/true
+install sctp /bin/true
+install rds /bin/true
+install tipc /bin/true
+
+stat /boot/grub/grub.cfg
+
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
+GRUB_CMDLINE_LINUX_DEFAULT="quiet"
+GRUB_CMDLINE_LINUX="apparmor=1 security=apparmor audit=1"
+
+
+init.d daemons: (X borrado, O conservado, B por borrar) ls -la /etc/init.d/
+
+O accounts-daemon	manejo de cuentas (sólo es requerido si se cuenta con interfaz gráfica)
+X alsa-utils		Sonido en la computadora
+O anacron		asyncron cron
+O apparmor		seguridad (asociar cada programa a un perfil de seuridad)
+X avahi-daemon	asignar automaticamente IP, función DNS y hacer losta de servicios en la red local
+X bluetooth		servicio bluetooth
+O console-setup.sh	
+O cron			correr programas cada cierto tiempo
+O dbus			programa que comunica 1 o más aplicaciones entre sí
+B gdm3			precargado de GNOME para interfaz gráfica
+O hwclock.sh		
+O irqbalance		balance entre multiples procesadores (no necesario si cuenta con NUMA el procesador)
+O keyboard-setup.sh
+O kmod		kernel module manager
+X minissdpd		acelera el descubrimiento de dispositivos
+O networking		
+O network-manager
+X pppd-dns		para internet dial-up
+O procps		paquete con utilidades de procesos (como top y ps)
+O rsyslog		encargado de logs así como sus rotaciones
+X saned		scanner de dispositivos
+X speech-dispatcher	demonio para poder decir cosas usando el sonido
+O udev			permite conectar dispositivos y encontrar sus datos desde que se conectan
+X unattended-upgrades	demonio para hacer updates automaticamente
+B x11-common	interfaz gráfica
+
+Estado de los serviciosa verificar por el CIS: 
+#systemctl list-unit-files  | grep <service_name>
+(N – no instalado, D – disabled, P – por configurar, B – por borrar, M - masked)
+
+xserver-xorg-core*		B
+avahi-daemon			D
+cups				N
+isc-dhcp-server		N
+ntp				N
+slapd				N
+rpcbind			N
+bind9				N
+vsftpd				N
+apache2			N
+dovecot			N
+samba (smbd)			N
+squid3				N
+snmpd				N
+postfix				P
+rsync				N
+
+/etc/sysctl.d/99-sysctl.conf
+
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
+net.ipv4.ip_forward=0
+net.ipv4.conf.all.send_redirects=0
+net.ipv4.conf.default.send_redirects=0
+net.ipv4.conf.all.accept_source_route=0
+net.ipv4. conf.default.accept_source_route=0
+net.ipv4.conf.all.accept_redirects=0
+net.ipv4.conf.default.accept_redirects=0
+net.ipv4.conf.all.secure_redirects=0
+net.ipv4.conf.default.secure_redirects=0
+
+net.ipv4.conf.all.log_martians=1
+net.ipv4.conf.default.log_martians=1
+net.ipv4.icmp_echo_ignore_broadcasts=1
+net.ipv4.icmp_ignore_bogus_error_responses=1
+net.ipv4.conf.all.rp_filter=1
+net.ipv4.conf.default.rp_filter=1
+net.ipv4.tcp_syncookies=1
+
+
+/etc/audit/auditd.conf:
+max_log_file = <MB>
+space_left_action = email // si no hay usar SYSLOG
+action_mail_acct = root
+admin_space_left_action = halt  // puede ser suspend si nos vale chosto
+max_log_file_action = keep_logs  //si no tenemos suficiente espacio usar ROTATE
+
+
+/etc/pam.d/common-password
+
+
+password	requisite			pam_cracklib.so retry=3 minlen=8 dcredit=-1 lcredit=-1 pcredit=-1 ucredit=-1
+
+password	[success=1 default=ignore]	pam_unix.so obscure use_authtok try_first_pass sha512 remember=5
+
+password	requisite			pam_deny.so
+
+password	optional	pam_gnome_keyring.so 
+
+/etc/audit/rules.d/audit.rules
+
+-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
+-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
+-a always,exit -F arch=b64 -S clock_settime -k time-change
+-a always,exit -F arch=b32 -S clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+-a exit,always -F arch=b64 -S sethostname -S setdomainname -k system-locale
+-a exit,always -F arch=b32 -S sethostname -S setdomainname -k system-locale
+-w /etc/issue -p wa -k system-locale
+-w /etc/issue.net -p wa -k system-locale
+-w /etc/hosts -p wa -k system-locale
+-w /etc/network -p wa -k system-locale
+-w /etc/selinux/ -p wa -k MAC-policy
+-w /var/log/faillog -p wa -k logins
+-w /var/log/lastlog -p wa -k logins
+-w /var/log/tallylog -p wa -k logins
+-w /var/run/utmp -p wa -k session
+-w /var/log/wtmp -p wa -k session
+-w /var/log/btmp -p wa -k session
+-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+
+
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+
+-a always,exit -F path=/sbin/unix_chkpwd -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/bin/fusermount -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/bin/umount -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/bin/mount -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/bin/su -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/bin/ntfs-3g -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/bin/ping -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+
+-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete
+-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete
+
+-w /etc/sudoers -p wa -k scope
+
+-w /var/log/sudo.log -p wa -k actions
+
+-w /sbin/insmod -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/modprobe -p x -k modules
+-a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+
+-w /usr/bin/docker -k docker
+
+-e 2

@@ -1,0 +1,34 @@
+dpkg -s nis
+
+grep ^shell /etc/inetd.conf
+grep ^login /etc/inetd.conf
+grep ^exec /etc/inetd.conf
+
+dpkg -s rsh-client
+dpkg -s rsh-redone-client
+
+alsa-utils		Sonido en la computadora
+anacron			asyncron cron
+apparmor		seguridad (asociar cada programa a un perfil de seuridad)
+avahi-daemon		asignar automaticamente IP, función DNS y hacer losta de servicios en la red local
+bluetooth		servicio bluetooth
+console-setup.sh	
+cron			correr programas cada cierto tiempo
+dbus			programa que comunica 1 o más aplicaciones entre sí
+gdm3			precargado de GNOME para interfaz gráfica
+hwclock.sh		
+irqbalance		balance entre multiples procesadores (no necesario si cuenta con NUMA el procesador)
+keyboard-setup.sh
+kmod			kernel module manager
+minissdpd		acelera el descubrimiento de dispositivos
+networking		
+network-manager
+pppd-dns		para internet dial-up
+procps			paquete con utilidades de procesos (como top y ps)
+rsyslog			encargado de logs así como sus rotaciones
+saned			scanner de dispositivos
+speech-dispatcher	demonio para poder decir cosas usando el sonido
+udev			permite conectar dispositivos y encontrar sus datos desde que se conectan
+unattended-upgrades	demonio para hacer updates automaticamente
+x11-common		interfaz gráfica
+

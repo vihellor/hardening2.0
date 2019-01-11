@@ -1,0 +1,39 @@
+expiration
+Admin =  60 days
+Regulars = 180 days
+
+Ensure minimum days between password changes is 7 or more
+
+Admin = 7
+Regulars = 7
+
+Ensure password expiration warning days is 7 or more (Scored)
+
+Admin = 15
+Regulars = 15
+
+Ensure inactive password lock is 30 days or less (Scored)
+
+Servidores
+
+Admin = --
+Regulars = --
+
+General
+
+Admin = 30
+Regulars = 30
+
+Ensure system accounts are non-login (requiere iniciar desde cuenta sin privilegios y de ahí ya permitir entrada a root)
+
+Bloquear acceso a servicios (los que se acceden desde MZ) fuera de horas laborales
+
+Ensure default user shell timeout is 900 seconds or less
+
+timeout = 900
+
+Ensure root login is restricted to system console
+
+Ensure access to the su command is restricted
+
+
